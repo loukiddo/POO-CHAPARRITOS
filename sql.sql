@@ -29,16 +29,8 @@ CREATE TABLE PAQUETE_TURISTICO (
     nombre_paquete VARCHAR(100) NOT NULL,
     fecha_inicio DATE NOT NULL,
     fecha_fin DATE NOT NULL,
+    destinos TEXT NOT NULL,  -- Destinos almacenados como texto separado por comas
     precio_total DECIMAL(10, 2) DEFAULT 0
-);
-
--- Tabla de relación entre PAQUETES TURÍSTICOS y DESTINOS
-CREATE TABLE PAQUETE_DESTINO (
-    id_paquete INT NOT NULL,
-    id_destino INT NOT NULL,
-    PRIMARY KEY (id_paquete, id_destino),
-    FOREIGN KEY (id_paquete) REFERENCES PAQUETE_TURISTICO(id_paquete),
-    FOREIGN KEY (id_destino) REFERENCES DESTINO(id_destino)
 );
 
 -- Tabla para RESERVAS
