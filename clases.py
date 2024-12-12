@@ -22,6 +22,15 @@ class Usuario:
         result = hacer_consulta(query, "select", variables)
         return result[0] if result else None
 
+    def ver_usuarios(self):
+        query = "SELECT * FROM USUARIO"
+        result = hacer_consulta(query, "select")
+        if result:
+            # Usamos un solo print con un formato más directo
+            print("\n".join([f"ID: {u[0]}, Nombre: {u[1]}, Email: {u[2]}" for u in result]))
+        else:
+            print("No se encontraron usuarios.")
+
 class Cliente:
     def __init__(self, id_cliente, id_usuario, nombre_cliente):
         self.id_cliente = id_cliente
@@ -33,10 +42,14 @@ class Cliente:
         variables = [self.id_cliente, self.id_usuario, self.nombre_cliente]
         hacer_consulta(query, "insert", variables)
 
-    def ver_detalles(self):
-        query = "SELECT nombre_cliente, email FROM CLIENTE WHERE id_cliente = :1"
-        variables = [self.id_cliente]
-        return hacer_consulta(query, "select", variables)
+    def ver_clientes(self):
+        query = "SELECT * FROM CLIENTE"
+        result = hacer_consulta(query, "select")
+        if result:
+            # Usamos un solo print con un formato más directo
+            print("\n".join([f"ID Cliente: {c[0]}, ID Usuario: {c[1]}, Nombre Cliente: {c[2]}" for c in result]))
+        else:
+            print("No se encontraron clientes.")
 
 class Destino:
     def __init__(self, id_destino, nombre_destino, descripcion, actividades, costo, paquete=None):
@@ -48,28 +61,22 @@ class Destino:
         self.paquete = paquete
 
     def agregar_destino(self):
-        query_insert = "INSERT INTO DESTINO (id_destino, nombre_destino, descripcion, actividades, costo, id_paquete) VALUES (:1, :2, :3, :4, :5, :6)"
-        query_update_precio = "UPDATE PAQUETE_TURISTICO SET PRECIO_TOTAL = PRECIO_TOTAL + :1 WHERE ID_PAQUETE = :2"
-        variables_insert = [self.id_destino, self.nombre_destino, self.descripcion, self.actividades, self.costo, self.paquete if self.paquete else None]
+        query_insert = "INSERT INTO DESTINO (id_destino, nombre_destino, descripcion, actividades, costo) VALUES (:1, :2, :3, :4, :5)"
+        variables_insert = [self.id_destino, self.nombre_destino, self.descripcion, self.actividades, self.costo]
         hacer_consulta(query_insert, 'insert', variables_insert)
         
         if self.paquete:
-            hacer_consulta(query_update_precio, 'update', [self.costo, self.paquete])
+            query_associate = "INSERT INTO PAQUETE_DESTINO (id_paquete, id_destino) VALUES (:1, :2)"
+            hacer_consulta(query_associate, 'insert', [self.paquete, self.id_destino])
 
-    def modificar_destino(self, nombre_destino=None, descripcion=None, actividades=None, costo=None):
-        query = "UPDATE DESTINO SET nombre_destino = :1, descripcion = :2, actividades = :3, costo = :4 WHERE id_destino = :5"
-        variables = [nombre_destino or self.nombre_destino, descripcion or self.descripcion, actividades or self.actividades, costo or self.costo, self.id_destino]
-        hacer_consulta(query, 'update', variables)
-
-    def eliminar_destino(self):
-        query_delete = "DELETE FROM DESTINO WHERE id_destino = :1"
-        query_update_precio = "UPDATE PAQUETE_TURISTICO SET PRECIO_TOTAL = PRECIO_TOTAL - :1 WHERE ID_PAQUETE = :2"
-        variables = [self.id_destino]
-        
-        if self.paquete:
-            hacer_consulta(query_update_precio, 'update', [self.costo, self.paquete])
-
-        hacer_consulta(query_delete, 'delete', variables)
+    def ver_destinos(self):
+        query = "SELECT * FROM DESTINO"
+        result = hacer_consulta(query, "select")
+        if result:
+            # Usamos un solo print con un formato más directo
+            print("\n".join([f"ID Destino: {d[0]}, Nombre Destino: {d[1]}, Descripción: {d[2]}, Actividades: {d[3]}, Costo: {d[4]}" for d in result]))
+        else:
+            print("No se encontraron destinos.")
 
 class PaqueteTuristico:
     def __init__(self, id_paquete, nombre_paquete, fecha_inicio, fecha_fin):
@@ -91,15 +98,14 @@ class PaqueteTuristico:
         self.precio_total = result[0][0] if result and result[0][0] is not None else 0
         return self.precio_total
 
-    def actualizar_paquete(self, nombre_paquete=None, fecha_inicio=None, fecha_fin=None):
-        query = "UPDATE PAQUETE_TURISTICO SET nombre_paquete = :1, fecha_inicio = :2, fecha_fin = :3 WHERE id_paquete = :4"
-        variables = [nombre_paquete or self.nombre_paquete, fecha_inicio or self.fecha_inicio, fecha_fin or self.fecha_fin, self.id_paquete]
-        hacer_consulta(query, "update", variables)
-
-    def eliminar_paquete(self):
-        query = "DELETE FROM PAQUETE_TURISTICO WHERE id_paquete = :1"
-        variables = [self.id_paquete]
-        hacer_consulta(query, "delete", variables)
+    def ver_paquetes(self):
+        query = "SELECT * FROM PAQUETE_TURISTICO"
+        result = hacer_consulta(query, "select")
+        if result:
+            # Usamos un solo print con un formato más directo
+            print("\n".join([f"ID Paquete: {p[0]}, Nombre Paquete: {p[1]}, Fecha Inicio: {p[2]}, Fecha Fin: {p[3]}, Precio Total: {p[4]}" for p in result]))
+        else:
+            print("No se encontraron paquetes turísticos.")
 
 class Reserva:
     def __init__(self, id_reserva, id_cliente, id_paquete, fecha_reserva, estado_reserva="Pendiente"):
@@ -118,3 +124,12 @@ class Reserva:
         query = "UPDATE RESERVA SET estado_reserva = 'Cancelada' WHERE id_reserva = :1"
         variables = [self.id_reserva]
         hacer_consulta(query, "update", variables)
+
+    def ver_reservas(self):
+        query = "SELECT * FROM RESERVA"
+        result = hacer_consulta(query, "select")
+        if result:
+            # Usamos un solo print con un formato más directo
+            print("\n".join([f"ID Reserva: {r[0]}, ID Cliente: {r[1]}, ID Paquete: {r[2]}, Fecha Reserva: {r[3]}, Estado Reserva: {r[4]}" for r in result]))
+        else:
+            print("No se encontraron reservas.")
