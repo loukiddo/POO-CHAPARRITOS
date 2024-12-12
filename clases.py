@@ -79,13 +79,12 @@ class Cliente(Usuario):
 
 class Destino:
     def __init__(self, id_destino: int, nombre_destino: str, descripcion: str, actividades: str, costo: float):
-        self.id_destino     = id_destino
+        self.id_destino = id_destino
         self.nombre_destino = nombre_destino
-        self.descripcion    = descripcion
-        self.actividades    = actividades
-        self.costo          = costo
+        self.descripcion = descripcion
+        self.actividades = actividades
+        self.costo = costo
 
-    # Métodos
     def registrar_destino(self):
         """Registrar un destino en la base de datos"""
         query = "INSERT INTO DESTINO (id_destino, nombre_destino, descripcion, actividades, costo) VALUES(:id_destino, :nombre_destino, :descripcion, :actividades, :costo)"
@@ -93,64 +92,95 @@ class Destino:
         hacer_consulta(query, 'insert', variables)
 
     def ver_destinos(self):
-        """Ver los destinos registrados"""
+        """Ver todos los destinos disponibles"""
         query = "SELECT * FROM DESTINO"
         result = hacer_consulta(query, 'select')
         if result:
-            return result
+            return result  # Devuelve la lista de destinos
         else:
             return "No se encontraron destinos."
 
 
 class PaqueteTuristico:
-    def __init__(self, id_paquete: int, nombre_paquete: str, fecha_inicio: str, fecha_fin: str, destinos: list = []):
-        self.id_paquete    = id_paquete
+    def __init__(self, id_paquete: int, nombre_paquete: str, fecha_inicio: str, fecha_fin: str, destinos: str):
+        """
+        El campo destinos se almacenará como una cadena de texto separada por comas.
+        Ejemplo: 'Playa del Sol, Montaña Nevada'.
+        """
+        self.id_paquete = id_paquete
         self.nombre_paquete = nombre_paquete
-        self.fecha_inicio   = fecha_inicio
-        self.fecha_fin      = fecha_fin
-        self.precio_total  = 0
-        self.destinos      = destinos  # Lista de destinos asociados al paquete
+        self.fecha_inicio = fecha_inicio
+        self.fecha_fin = fecha_fin
+        self.destinos = destinos  # Cadena de texto con destinos separados por comas
+        self.precio_total = 0
+
+    def crear_paquete(self):
+        """Registrar un paquete turístico en la base de datos"""
+        query = "INSERT INTO PAQUETE_TURISTICO (id_paquete, nombre_paquete, fecha_inicio, fecha_fin, destinos, precio_total) VALUES(:id_paquete, :nombre_paquete, :fecha_inicio, :fecha_fin, :destinos, :precio_total)"
+        variables = [self.id_paquete, self.nombre_paquete, self.fecha_inicio, self.fecha_fin, self.destinos, self.precio_total]
+        hacer_consulta(query, 'insert', variables)
 
     def calcular_precio_total(self):
-        """Calcular el precio total del paquete sumando los costos de los destinos asociados"""
-        total = sum([destino.costo for destino in self.destinos])
-        self.precio_total = total
+        """Calcular el precio total del paquete turístico basado en los destinos"""
+        destinos = self.destinos.split(",")  # Convertimos la cadena en una lista de destinos
+        precio_total = 0
+        for destino in destinos:
+            # Suponemos que los destinos ya están registrados en la base de datos
+            query = "SELECT costo FROM DESTINO WHERE nombre_destino = :destino"
+            variables = [destino.strip()]  # Limpiamos el espacio en blanco alrededor del nombre del destino
+            result = hacer_consulta(query, 'select', variables)
+            if result:
+                precio_total += result[0][0]
+        self.precio_total = precio_total
         return self.precio_total
 
-    def registrar_paquete(self):
-        """Registrar un nuevo paquete turístico en la base de datos"""
-        query = "INSERT INTO PAQUETE_TURISTICO (id_paquete, nombre_paquete, fecha_inicio, fecha_fin, precio_total) VALUES(:id_paquete, :nombre_paquete, :fecha_inicio, :fecha_fin, :precio_total)"
-        variables = [self.id_paquete, self.nombre_paquete, self.fecha_inicio, self.fecha_fin, self.precio_total]
-        hacer_consulta(query, 'insert', variables)
-        
-        # Asociar destinos con el paquete
-        for destino in self.destinos:
-            self.asociar_destino(destino)
-
-    def asociar_destino(self, destino):
-        """Asociar un destino al paquete turístico"""
-        query = "INSERT INTO PAQUETE_DESTINO (id_paquete, id_destino) VALUES(:id_paquete, :id_destino)"
-        variables = [self.id_paquete, destino.id_destino]
-        hacer_consulta(query, 'insert', variables)
-
-    def ver_paquete(self):
-        """Ver la información del paquete turístico junto con los destinos asociados"""
-        query = "SELECT * FROM PAQUETE_TURISTICO WHERE id_paquete = :id_paquete"
-        variables = [self.id_paquete]
-        result = hacer_consulta(query, 'select', variables)
-        
+    def ver_paquetes(self):
+        """Ver todos los paquetes turísticos disponibles"""
+        query = "SELECT * FROM PAQUETE_TURISTICO"
+        result = hacer_consulta(query, 'select')
         if result:
-            return result[0]  # Devuelve la información del paquete
+            return result  # Devuelve la lista de paquetes turísticos
         else:
-            return "Paquete no encontrado."
+            return "No se encontraron paquetes turísticos."
 
-    def ver_destinos_asociados(self):
-        """Ver los destinos asociados a un paquete turístico"""
-        query = "SELECT d.* FROM DESTINO d JOIN PAQUETE_DESTINO pd ON d.id_destino = pd.id_destino WHERE pd.id_paquete = :id_paquete"
+    def actualizar_paquete(self, nombre_paquete=None, fecha_inicio=None, fecha_fin=None, destinos=None):
+        """Actualizar un paquete turístico en la base de datos"""
+        query = "UPDATE PAQUETE_TURISTICO SET nombre_paquete = :nombre_paquete, fecha_inicio = :fecha_inicio, fecha_fin = :fecha_fin, destinos = :destinos WHERE id_paquete = :id_paquete"
+        variables = [nombre_paquete or self.nombre_paquete, fecha_inicio or self.fecha_inicio, fecha_fin or self.fecha_fin, destinos or self.destinos, self.id_paquete]
+        hacer_consulta(query, 'update', variables)
+
+    def eliminar_paquete(self):
+        """Eliminar un paquete turístico de la base de datos"""
+        query = "DELETE FROM PAQUETE_TURISTICO WHERE id_paquete = :id_paquete"
         variables = [self.id_paquete]
-        result = hacer_consulta(query, 'select', variables)
-        
+        hacer_consulta(query, 'delete', variables)
+
+
+class Reserva:
+    def __init__(self, id_reserva: int, id_cliente: int, id_paquete: int, fecha_reserva: str, estado_reserva: str = "Pendiente"):
+        self.id_reserva = id_reserva
+        self.id_cliente = id_cliente
+        self.id_paquete = id_paquete
+        self.fecha_reserva = fecha_reserva
+        self.estado_reserva = estado_reserva
+
+    def crear_reserva(self):
+        """Registrar una nueva reserva en la base de datos"""
+        query = "INSERT INTO RESERVA (id_reserva, id_cliente, id_paquete, fecha_reserva, estado_reserva) VALUES(:id_reserva, :id_cliente, :id_paquete, :fecha_reserva, :estado_reserva)"
+        variables = [self.id_reserva, self.id_cliente, self.id_paquete, self.fecha_reserva, self.estado_reserva]
+        hacer_consulta(query, 'insert', variables)
+
+    def cancelar_reserva(self):
+        """Cancelar una reserva"""
+        query = "UPDATE RESERVA SET estado_reserva = 'Cancelada' WHERE id_reserva = :id_reserva"
+        variables = [self.id_reserva]
+        hacer_consulta(query, 'update', variables)
+
+    def ver_reservas(self):
+        """Ver todas las reservas realizadas"""
+        query = "SELECT * FROM RESERVA"
+        result = hacer_consulta(query, 'select')
         if result:
-            return result  # Devuelve los destinos asociados al paquete
+            return result  # Devuelve la lista de reservas
         else:
-            return "No se encontraron destinos para este paquete."
+            return "No se encontraron reservas."
