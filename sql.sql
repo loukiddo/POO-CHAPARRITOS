@@ -1,45 +1,47 @@
--- Tabla para USUARIOS
+-- Tabla de usuarios
 CREATE TABLE USUARIO (
     id_usuario INT PRIMARY KEY,
-    nombre_usuario VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL
+    nombre_usuario VARCHAR2(100),
+    email VARCHAR2(100) UNIQUE,
+    password VARCHAR2(256)
 );
 
--- Tabla para CLIENTES (Hereda de USUARIO)
+-- Tabla de clientes (relacionada con usuarios)
 CREATE TABLE CLIENTE (
     id_cliente INT PRIMARY KEY,
-    id_usuario INT NOT NULL,
-    nombre_cliente VARCHAR(100) NOT NULL,
-    FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+    nombre_cliente VARCHAR2(100),
+    id_usuario INT,
+    FOREIGN KEY (id_usuario) REFERENCES USUARIO (id_usuario) ON DELETE CASCADE
 );
 
--- Tabla para DESTINOS
+-- Tabla de destinos
 CREATE TABLE DESTINO (
     id_destino INT PRIMARY KEY,
-    nombre_destino VARCHAR(100) NOT NULL,
-    descripcion TEXT,
-    actividades TEXT,
-    costo DECIMAL(10, 2) NOT NULL
+    nombre_destino VARCHAR2(100),
+    descripcion VARCHAR2(255),
+    actividades VARCHAR2(255),
+    costo FLOAT,
+    paquete INT,
+    FOREIGN KEY (paquete) REFERENCES PAQUETE_TURISTICO (id_paquete) ON DELETE SET NULL
 );
 
--- Tabla para PAQUETES TURÍSTICOS
+-- Tabla de paquetes turísticos
 CREATE TABLE PAQUETE_TURISTICO (
     id_paquete INT PRIMARY KEY,
-    nombre_paquete VARCHAR(100) NOT NULL,
-    fecha_inicio DATE NOT NULL,
-    fecha_fin DATE NOT NULL,
-    destinos TEXT NOT NULL,  -- Destinos almacenados como texto separado por comas
-    precio_total DECIMAL(10, 2) DEFAULT 0
+    nombre_paquete VARCHAR2(100),
+    fecha_inicio DATE,
+    fecha_fin DATE,
+    destinos VARCHAR2(255),
+    precio_total FLOAT
 );
 
--- Tabla para RESERVAS
+-- Tabla de reservas
 CREATE TABLE RESERVA (
     id_reserva INT PRIMARY KEY,
-    id_cliente INT NOT NULL,
-    id_paquete INT NOT NULL,
-    fecha_reserva DATE NOT NULL,
-    estado_reserva VARCHAR(20) DEFAULT 'Pendiente',
-    FOREIGN KEY (id_cliente) REFERENCES CLIENTE(id_cliente),
-    FOREIGN KEY (id_paquete) REFERENCES PAQUETE_TURISTICO(id_paquete)
+    id_cliente INT,
+    id_paquete INT,
+    fecha_reserva DATE,
+    estado_reserva VARCHAR2(50) DEFAULT 'Pendiente',
+    FOREIGN KEY (id_cliente) REFERENCES CLIENTE (id_cliente) ON DELETE CASCADE,
+    FOREIGN KEY (id_paquete) REFERENCES PAQUETE_TURISTICO (id_paquete) ON DELETE CASCADE
 );
