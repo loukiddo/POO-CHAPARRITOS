@@ -1,5 +1,5 @@
-from clases import Usuario, Cliente, Destino, PaqueteTuristico, Reserva
 from bd import hacer_consulta
+from clases import Usuario, Cliente, Destino, PaqueteTuristico, Reserva
 
 def create_usuario():
     id_usuario = int(input("ID Usuario: "))
@@ -55,8 +55,7 @@ def delete_usuario():
     except Exception as e:
         print(f"Error al eliminar usuario: {e}")
 
-# Similar lógica para Cliente, Destino, PaqueteTuristico y Reserva
-
+# CRUD para Cliente
 def create_cliente():
     id_cliente = int(input("ID Cliente: "))
     nombre_cliente = input("Nombre del Cliente: ")
@@ -73,6 +72,33 @@ def create_cliente():
         print("Cliente creado correctamente.")
     except Exception as e:
         print(f"Error al crear cliente: {e}")
+
+def read_cliente():
+    id_cliente = int(input("ID Cliente a buscar: "))
+    query = "SELECT * FROM CLIENTE WHERE id_cliente = :id_cliente"
+    try:
+        result = hacer_consulta(query, 'select', [id_cliente])
+        if result:
+            print("Cliente encontrado:", result[0])
+        else:
+            print("Cliente no encontrado.")
+    except Exception as e:
+        print(f"Error al buscar cliente: {e}")
+
+def update_cliente():
+    id_cliente = int(input("ID Cliente a actualizar: "))
+    nombre_cliente = input("Nuevo Nombre (dejar vacío para no cambiar): ")
+
+    query = "SELECT * FROM CLIENTE WHERE id_cliente = :id_cliente"
+    result = hacer_consulta(query, 'select', [id_cliente])
+    if not result:
+        print("Cliente no encontrado.")
+        return
+
+    cliente = Cliente(id_cliente, nombre_cliente, *result[0][2:])
+    cliente.nombre_cliente = nombre_cliente if nombre_cliente else cliente.nombre_cliente
+    cliente.registrar_cliente()
+    print("Cliente actualizado correctamente.")
 
 def delete_cliente():
     id_cliente = int(input("ID Cliente a eliminar: "))
@@ -98,6 +124,40 @@ def create_destino():
     except Exception as e:
         print(f"Error al registrar destino: {e}")
 
+def read_destino():
+    id_destino = int(input("ID Destino a buscar: "))
+    query = "SELECT * FROM DESTINO WHERE id_destino = :id_destino"
+    try:
+        result = hacer_consulta(query, 'select', [id_destino])
+        if result:
+            print("Destino encontrado:", result[0])
+        else:
+            print("Destino no encontrado.")
+    except Exception as e:
+        print(f"Error al buscar destino: {e}")
+
+def update_destino():
+    id_destino = int(input("ID Destino a actualizar: "))
+    nombre_destino = input("Nuevo Nombre (dejar vacío para no cambiar): ")
+    descripcion = input("Nueva Descripción (dejar vacío para no cambiar): ")
+    actividades = input("Nuevas Actividades (dejar vacío para no cambiar): ")
+    costo = input("Nuevo Costo (dejar vacío para no cambiar): ")
+
+    query = "SELECT * FROM DESTINO WHERE id_destino = :id_destino"
+    result = hacer_consulta(query, 'select', [id_destino])
+    if not result:
+        print("Destino no encontrado.")
+        return
+
+    destino = Destino(*result[0])
+    destino.actualizar_destino(
+        nombre_destino=nombre_destino if nombre_destino else None,
+        descripcion=descripcion if descripcion else None,
+        actividades=actividades if actividades else None,
+        costo=float(costo) if costo else None
+    )
+    print("Destino actualizado correctamente.")
+
 def delete_destino():
     id_destino = int(input("ID Destino a eliminar: "))
     destino = Destino(id_destino, "", "", "", 0)
@@ -121,6 +181,40 @@ def create_paquete():
         print("Paquete creado correctamente.")
     except Exception as e:
         print(f"Error al crear paquete: {e}")
+
+def read_paquete():
+    id_paquete = int(input("ID Paquete a buscar: "))
+    query = "SELECT * FROM PAQUETE_TURISTICO WHERE id_paquete = :id_paquete"
+    try:
+        result = hacer_consulta(query, 'select', [id_paquete])
+        if result:
+            print("Paquete encontrado:", result[0])
+        else:
+            print("Paquete no encontrado.")
+    except Exception as e:
+        print(f"Error al buscar paquete: {e}")
+
+def update_paquete():
+    id_paquete = int(input("ID Paquete a actualizar: "))
+    nombre_paquete = input("Nuevo Nombre (dejar vacío para no cambiar): ")
+    fecha_inicio = input("Nueva Fecha de Inicio (dejar vacío para no cambiar): ")
+    fecha_fin = input("Nueva Fecha de Fin (dejar vacío para no cambiar): ")
+    destinos = input("Nuevos Destinos (dejar vacío para no cambiar): ")
+
+    query = "SELECT * FROM PAQUETE_TURISTICO WHERE id_paquete = :id_paquete"
+    result = hacer_consulta(query, 'select', [id_paquete])
+    if not result:
+        print("Paquete no encontrado.")
+        return
+
+    paquete = PaqueteTuristico(*result[0])
+    paquete.actualizar_paquete(
+        nombre_paquete=nombre_paquete if nombre_paquete else None,
+        fecha_inicio=fecha_inicio if fecha_inicio else None,
+        fecha_fin=fecha_fin if fecha_fin else None,
+        destinos=destinos if destinos else None
+    )
+    print("Paquete actualizado correctamente.")
 
 def delete_paquete():
     id_paquete = int(input("ID Paquete a eliminar: "))
@@ -146,6 +240,38 @@ def create_reserva():
     except Exception as e:
         print(f"Error al crear reserva: {e}")
 
+def read_reserva():
+    id_reserva = int(input("ID Reserva a buscar: "))
+    query = "SELECT * FROM RESERVA WHERE id_reserva = :id_reserva"
+    try:
+        result = hacer_consulta(query, 'select', [id_reserva])
+        if result:
+            print("Reserva encontrada:", result[0])
+        else:
+            print("Reserva no encontrada.")
+    except Exception as e:
+        print(f"Error al buscar reserva: {e}")
+
+def update_reserva():
+    id_reserva = int(input("ID Reserva a actualizar: "))
+    id_cliente = input("Nuevo ID Cliente (dejar vacío para no cambiar): ")
+    id_paquete = input("Nuevo ID Paquete (dejar vacío para no cambiar): ")
+    fecha_reserva = input("Nueva Fecha de Reserva (dejar vacío para no cambiar): ")
+    estado_reserva = input("Nuevo Estado (dejar vacío para no cambiar): ")
+
+    query = "SELECT * FROM RESERVA WHERE id_reserva = :id_reserva"
+    result = hacer_consulta(query, 'select', [id_reserva])
+    if not result:
+        print("Reserva no encontrada.")
+        return
+
+    reserva = Reserva(*result[0])
+    reserva.actualizar_reserva(
+        fecha_reserva=fecha_reserva if fecha_reserva else None,
+        estado_reserva=estado_reserva if estado_reserva else None
+    )
+    print("Reserva actualizada correctamente.")
+
 def delete_reserva():
     id_reserva = int(input("ID Reserva a eliminar: "))
     reserva = Reserva(id_reserva, 0, 0, "", "")
@@ -163,13 +289,21 @@ def menu():
         "3": update_usuario,
         "4": delete_usuario,
         "5": create_cliente,
-        "6": delete_cliente,
-        "7": create_destino,
-        "8": delete_destino,
-        "9": create_paquete,
-        "10": delete_paquete,
-        "11": create_reserva,
-        "12": delete_reserva,
+        "6": read_cliente,
+        "7": update_cliente,
+        "8": delete_cliente,
+        "9": create_destino,
+        "10": read_destino,
+        "11": update_destino,
+        "12": delete_destino,
+        "13": create_paquete,
+        "14": read_paquete,
+        "15": update_paquete,
+        "16": delete_paquete,
+        "17": create_reserva,
+        "18": read_reserva,
+        "19": update_reserva,
+        "20": delete_reserva,
     }
 
     while True:
@@ -180,18 +314,26 @@ def menu():
         3. Actualizar Usuario
         4. Eliminar Usuario
         5. Crear Cliente
-        6. Eliminar Cliente
-        7. Crear Destino
-        8. Eliminar Destino
-        9. Crear Paquete Turístico
-        10. Eliminar Paquete Turístico
-        11. Crear Reserva
-        12. Eliminar Reserva
-        13. Salir
+        6. Leer Cliente
+        7. Actualizar Cliente
+        8. Eliminar Cliente
+        9. Crear Destino
+        10. Leer Destino
+        11. Actualizar Destino
+        12. Eliminar Destino
+        13. Crear Paquete Turístico
+        14. Leer Paquete Turístico
+        15. Actualizar Paquete Turístico
+        16. Eliminar Paquete Turístico
+        17. Crear Reserva
+        18. Leer Reserva
+        19. Actualizar Reserva
+        20. Eliminar Reserva
+        21. Salir
         """)
         opcion = input("Seleccione una opción: ")
 
-        if opcion == "13":
+        if opcion == "21":
             print("Saliendo del sistema.")
             break
 
